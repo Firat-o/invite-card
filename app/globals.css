@@ -1,33 +1,90 @@
+/* styles/globals.css */
+
+@import url('https://fonts.googleapis.com/css2?family=Lucida+Handwriting&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-:root {
-  --foreground-rgb: 0, 0, 0;
-  --background-start-rgb: 214, 219, 220;
-  --background-end-rgb: 255, 255, 255;
+.leaf {
+  width: 100px;
+  height: 100px;
+  z-index: 0;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --foreground-rgb: 255, 255, 255;
-    --background-start-rgb: 0, 0, 0;
-    --background-end-rgb: 0, 0, 0;
+@layer components {
+  .plane-button {
+    --text-opacity: 1;
+    --success-x: -12px;
+    --success-stroke: 14px;
+    --success-opacity: 0;
+    --border-radius: 7px;
+    --overflow: hidden;
+    --x: 0px;
+    --y: 0px;
+    --rotate: 0deg;
+    --plane-x: 0px;
+    --plane-y: 0px;
+    --plane-opacity: 1;
+    --trails-stroke: 57px;
+    --left-wing-background: var(--primary);
+    --left-wing-first-x: 0%;
+    --left-wing-first-y: 0%;
+    --left-wing-second-x: 50%;
+    --left-wing-second-y: 0%;
+    --left-wing-third-x: 0%;
+    --left-wing-third-y: 100%;
+    --left-body-background: var(--primary);
+    --left-body-first-x: 50%;
+    --left-body-first-y: 0%;
+    --left-body-second-x: 50%;
+    --left-body-second-y: 100%;
+    --left-body-third-x: 0%;
+    --left-body-third-y: 100%;
+    --right-wing-background: var(--primary);
+    --right-wing-first-x: 50%;
+    --right-wing-first-y: 0%;
+    --right-wing-second-x: 100%;
+    --right-wing-second-y: 0%;
+    --right-wing-third-x: 100%;
+    --right-wing-third-y: 100%;
+    --right-body-background: var(--primary);
+    --right-body-first-x: 50%;
+    --right-body-first-y: 0%;
+    --right-body-second-x: 50%;
+    --right-body-second-y: 100%;
+    --right-body-third-x: 100%;
+    --right-body-third-y: 100%;
+    position: relative;
+    padding: 8px 0;
+    min-width: 100px;
+    text-align: center;
+    font-weight: 600;
+    color: var(--button-text);
+    border-radius: var(--border-radius);
+    transform: translateZ(0);
+    transition: opacity 0.25s, filter 0.25s;
+    -webkit-tap-highlight-color: transparent;
+    
+    /* Animation styles */
+    animation-name: flyAway; /* Name of the animation */
+    animation-duration: 1s; /* Duration of the animation */
+    animation-fill-mode: forwards; /* Keep the final state of the animation */
   }
-}
 
-body {
-  color: rgb(var(--foreground-rgb));
-  background: linear-gradient(
-      to bottom,
-      transparent,
-      rgb(var(--background-end-rgb))
-    )
-    rgb(var(--background-start-rgb));
-}
-
-@layer utilities {
-  .text-balance {
-    text-wrap: balance;
+  /* Define the keyframes for the animation */
+  @keyframes flyAway {
+    0% {
+      /* Initial state of the button */
+      /* Define the initial state properties */
+    }
+    100% {
+      /* Final state of the button */
+      /* Define the final state properties */
+    }
+  }
+  
+  .newsletter-form button:not(.active) {
+    background: var(--primary);
   }
 }
