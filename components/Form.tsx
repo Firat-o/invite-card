@@ -1,12 +1,13 @@
 import { EnvelopeIcon } from "@heroicons/react/24/outline";
 import { FormEvent, useRef, useState } from "react";
 import { collection, addDoc } from "firebase/firestore";
-import { db } from "../firebase/firebase"; // Assuming you export your initialized Firestore instance as 'db'
+import { db } from "../firebase/firebase";
 
 function Form() {
   const [nameInput, setNameInput] = useState("");
   const [guestInput, setGuestInput] = useState("");
   const [active, setActive] = useState(false);
+  const [successMessage, setSuccessMessage] = useState(false);
   const buttonRef = useRef<HTMLButtonElement>(null);
   const isButtonDisabled = !nameInput;
 
@@ -29,8 +30,14 @@ function Form() {
       setNameInput("");
       setGuestInput("");
 
-      // Show success message or trigger modal
-      // Add your logic here to handle success feedback to the user
+      // Show success message
+      setSuccessMessage(true);
+
+      // Hide success message after 5 seconds
+      setTimeout(() => {
+        setSuccessMessage(false);
+      }, 5000);
+
     } catch (e) {
       console.error("Error adding document:", e);
       // Add your logic here to handle error feedback to the user
@@ -44,9 +51,9 @@ function Form() {
         onSubmit={handleSubmit}
       >
         <div
-          className="group flex items-center gap-x-4 py-1 pl-4 pr-1 rounded-[9px] bg-gradient-to-r from-[#7eaa79] to-[#7eaa79]
-        hover:from-[#89b183] hover:to-[#89b183] relative shadow hover:shadow-lg 
-        focus-within:bg-gradient-to-r focus-within:from-[#8fb78b] focus-within:to-[#8fb78b]
+          className="group flex items-center gap-x-4 py-1 pl-4 pr-1 rounded-[9px] bg-gradient-to-r from-[#7eaa79] to-[#a2c29b]
+        hover:from-[#89b183] hover:to-[#b1c8b0] relative shadow hover:shadow-lg 
+        focus-within:bg-gradient-to-r focus-within:from-[#8fb78b] focus-within:to-[#c3d2c1]
         transition-all duration-700"
         >
           <input
@@ -63,8 +70,8 @@ function Form() {
         </div>
         <div
           className="group flex items-center gap-x-4 py-1 pl-4 pr-1 rounded-[9px] 
-        bg-gradient-to-r from-[#7eaa79] to-[#7eaa79] hover:from-[#89b183] hover:to-[#89b183] 
-        relative shadow hover:shadow-lg focus-within:bg-gradient-to-r focus-within:from-[#8fb78b] focus-within:to-[#8fb78b]
+        bg-gradient-to-r from-[#7eaa79] to-[#a2c29b] hover:from-[#89b183] hover:to-[#b1c8b0] 
+        relative shadow hover:shadow-lg focus-within:bg-gradient-to-r focus-within:from-[#8fb78b] focus-within:to-[#c3d2c1]
         transition-all duration-700 mt-6"
         >
           <input
@@ -86,7 +93,7 @@ function Form() {
           } plane-button relative overflow-hidden w-[200px] h-[50px] rounded-md shadow-lg text-white font-semibold text-lg uppercase tracking-wide border-none focus:outline-none transition-all duration-500 mt-6 ${
             isButtonDisabled
               ? "bg-gray-400 cursor-not-allowed"
-              : "bg-gradient-to-r from-[#7eaa79] to-[#7eaa79] hover:from-[#89b183] hover:to-[#89b183]"
+              : "bg-gradient-to-r from-[#7eaa79] to-[#a2c29b] hover:from-[#89b183] hover:to-[#b1c8b0]"
           }`}
         >
           <span className="absolute top-0 left-0 w-full h-full bg-white opacity-10 transform scale-x-0 origin-left"></span>
@@ -99,6 +106,11 @@ function Form() {
           </span>
         </button>
       </form>
+      {successMessage && (
+        <div className="text-center text-green-700 mt-4">
+          Eintrag erfolgreich, Wir melden uns bei dir 😊!
+        </div>
+      )}
     </div>
   );
 }
