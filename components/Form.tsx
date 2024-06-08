@@ -6,18 +6,25 @@ import { db } from "../firebase/firebase";
 function Form() {
   const [nameInput, setNameInput] = useState("");
   const [guestInput, setGuestInput] = useState("");
-  const [active, setActive] = useState(false);
+  const [loading, setLoading] = useState(false);
   const [successMessage, setSuccessMessage] = useState(false);
+  const [errorMessage, setErrorMessage] = useState("");
   const buttonRef = useRef<HTMLButtonElement>(null);
-  const isButtonDisabled = !nameInput;
+  const isButtonDisabled = !nameInput || loading;
 
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
-    const name = nameInput;
-    const guest = guestInput;
+    const name = nameInput.trim();
+    const guest = guestInput.trim();
 
-    if (!name) return;
+    if (!name) {
+      setErrorMessage("Der Name ist erforderlich.");
+      return;
+    }
+
+    setLoading(true);
+    setErrorMessage("");
 
     try {
       const docRef = await addDoc(collection(db, "users"), {
@@ -40,7 +47,9 @@ function Form() {
 
     } catch (e) {
       console.error("Error adding document:", e);
-      // Add your logic here to handle error feedback to the user
+      setErrorMessage("Fehler beim Hinzufügen des Eintrags. Bitte versuchen Sie es erneut.");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -88,27 +97,36 @@ function Form() {
           ref={buttonRef}
           disabled={isButtonDisabled}
           type="submit"
-          className={`${
-            active && "active"
-          } plane-button relative overflow-hidden w-[200px] h-[50px] rounded-md shadow-lg text-white font-semibold text-lg uppercase tracking-wide border-none focus:outline-none transition-all duration-500 mt-6 ${
+          className={`plane-button relative overflow-hidden w-[200px] h-[50px] rounded-md shadow-lg text-white font-semibold text-lg uppercase tracking-wide border-none focus:outline-none transition-all duration-500 mt-6 ${
             isButtonDisabled
               ? "bg-gray-400 cursor-not-allowed"
               : "bg-gradient-to-r from-[#7eaa79] to-[#a2c29b] hover:from-[#89b183] hover:to-[#b1c8b0]"
           }`}
         >
-          <span className="absolute top-0 left-0 w-full h-full bg-white opacity-10 transform scale-x-0 origin-left"></span>
-          <span className="absolute top-0 left-0 w-full h-full bg-white opacity-10 transform scale-y-0 origin-top"></span>
-          <span className="absolute top-0 left-0 w-full h-full bg-white opacity-10 transform scale-x-0 origin-right"></span>
-          <span className="absolute top-0 left-0 w-full h-full bg-white opacity-10 transform scale-y-0 origin-bottom"></span>
-          <span className="relative z-10 flex items-center justify-center gap-x-4">
-            <EnvelopeIcon className="w-6 h-6 text-[#181818] group-focus-within:text-white group-hover:text-white transition-colors duration-700 " />
-            Bestätigen
-          </span>
+          {loading ? (
+            <span className="loader"></span>
+          ) : (
+            <>
+              <span className="absolute top-0 left-0 w-full h-full bg-white opacity-10 transform scale-x-0 origin-left"></span>
+              <span className="absolute top-0 left-0 w-full h-full bg-white opacity-10 transform scale-y-0 origin-top"></span>
+              <span className="absolute top-0 left-0 w-full h-full bg-white opacity-10 transform scale-x-0 origin-right"></span>
+              <span className="absolute top-0 left-0 w-full h-full bg-white opacity-10 transform scale-y-0 origin-bottom"></span>
+              <span className="relative z-10 flex items-center justify-center gap-x-4">
+                <EnvelopeIcon className="w-6 h-6 text-[#181818] group-focus-within:text-white group-hover:text-white transition-colors duration-700 " />
+                Bestätigen
+              </span>
+            </>
+          )}
         </button>
       </form>
       {successMessage && (
         <div className="text-center text-green-700 mt-4">
           Eintrag erfolgreich, Wir melden uns bei dir 😊!
+        </div>
+      )}
+      {errorMessage && (
+        <div className="text-center text-red-700 mt-4">
+          {errorMessage}
         </div>
       )}
     </div>
