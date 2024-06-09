@@ -52,6 +52,9 @@ export default function Home() {
           <h1 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl xl:text-5xl  font-serif animate-title">
             islamischen Hochzeitsfeier ein
           </h1>
+          <p className="text-lg sm:text-xl md:text-2xl lg:text-3xl xl:text-4xl font-serif mt-4">
+            Datum der Feier: 11.10.2024
+          </p>
         </div>
         <Form />
       </main>
