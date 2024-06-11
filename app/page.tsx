@@ -53,7 +53,8 @@ export default function Home() {
             islamischen Hochzeitsfeier ein
           </h1>
           <p className="text-lg sm:text-xl md:text-2xl lg:text-3xl xl:text-4xl font-serif mt-4">
-            Datum der Feier: 11.10.2024
+            Datum der Feier: 11.10.2024 <br />
+            Ort: Iserlohn 58636
           </p>
         </div>
         <Form />
