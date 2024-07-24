@@ -69,6 +69,7 @@ function Form() {
             value={nameInput}
             onChange={(e) => setNameInput(e.target.value)}
             type="text"
+            pattern="[A-Za-z\u00C0-\u024F\s]*"
             placeholder="Dein Name"
             required
             className="w-full text-gray-800 bg-gray-100 
