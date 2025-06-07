@@ -56,7 +56,7 @@ export default function Home() {
             Wir laden dich herzlich zu unserer
           </h2>
           <h1 className="text-3xl md:text-4xl lg:text-5xl font-serif mt-2">
-            islamischen Hochzeitsfeier ein
+            Hochzeitsfeier ein
           </h1>
           <p className="text-xl md:text-2xl font-serif !mt-8"> {/* !mt-8 überschreibt space-y-4 für mehr Abstand */}
             Datum: <strong>11. Oktober 2024</strong> <br />
