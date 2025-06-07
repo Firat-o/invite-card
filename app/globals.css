@@ -1,26 +1,28 @@
 /* styles/globals.css */
 
+/* Die importierte Schriftart - perfekt für eine elegante Einladung */
 @import url('https://fonts.googleapis.com/css2?family=Lucida+Handwriting&display=swap');
 
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-.leaf {
-  width: 100px;
-  height: 100px;
-  z-index: 0;
+/* Basis-Styling für einen sanfteren Look im gesamten Dokument */
+body {
+  background-color: #f4f1eb; /* Ein warmer, cremiger Hintergrund anstelle von reinem Weiß */
+  color: #4a4a4a; /* Ein weicheres Schwarz für den Text */
 }
 
-
-
+/* Verbesserter Loader: Passt sich dem eleganten Farbschema an.
+  Die Animation wird durch eine sanftere ease-in-out Kurve flüssiger.
+*/
 .loader {
-  border: 4px solid #f3f3f3;
+  border: 4px solid rgba(126, 170, 121, 0.2); /* Sanfterer Rand */
   border-radius: 50%;
-  border-top: 4px solid #3498db;
+  border-top-color: #7eaa79; /* Hauptfarbe aus deinem Design */
   width: 24px;
   height: 24px;
-  animation: spin 2s linear infinite;
+  animation: spin 1.2s cubic-bezier(0.5, 0, 0.5, 1) infinite; /* Weichere Animation */
 }
 
 @keyframes spin {
@@ -30,78 +32,33 @@
 
 
 @layer components {
-  .plane-button {
-    --text-opacity: 1;
-    --success-x: -12px;
-    --success-stroke: 14px;
-    --success-opacity: 0;
-    --border-radius: 7px;
-    --overflow: hidden;
-    --x: 0px;
-    --y: 0px;
-    --rotate: 0deg;
-    --plane-x: 0px;
-    --plane-y: 0px;
-    --plane-opacity: 1;
-    --trails-stroke: 57px;
-    --left-wing-background: var(--primary);
-    --left-wing-first-x: 0%;
-    --left-wing-first-y: 0%;
-    --left-wing-second-x: 50%;
-    --left-wing-second-y: 0%;
-    --left-wing-third-x: 0%;
-    --left-wing-third-y: 100%;
-    --left-body-background: var(--primary);
-    --left-body-first-x: 50%;
-    --left-body-first-y: 0%;
-    --left-body-second-x: 50%;
-    --left-body-second-y: 100%;
-    --left-body-third-x: 0%;
-    --left-body-third-y: 100%;
-    --right-wing-background: var(--primary);
-    --right-wing-first-x: 50%;
-    --right-wing-first-y: 0%;
-    --right-wing-second-x: 100%;
-    --right-wing-second-y: 0%;
-    --right-wing-third-x: 100%;
-    --right-wing-third-y: 100%;
-    --right-body-background: var(--primary);
-    --right-body-first-x: 50%;
-    --right-body-first-y: 0%;
-    --right-body-second-x: 50%;
-    --right-body-second-y: 100%;
-    --right-body-third-x: 100%;
-    --right-body-third-y: 100%;
-    position: relative;
-    padding: 8px 0;
-    min-width: 100px;
-    text-align: center;
-    font-weight: 600;
-    color: var(--button-text);
-    border-radius: var(--border-radius);
-    transform: translateZ(0);
-    transition: opacity 0.25s, filter 0.25s;
-    -webkit-tap-highlight-color: transparent;
-    
-    /* Animation styles */
-    animation-name: flyAway; /* Name of the animation */
-    animation-duration: 1s; /* Duration of the animation */
-    animation-fill-mode: forwards; /* Keep the final state of the animation */
+  /* NEUER, ELEGANTER BUTTON:
+    Dieser Code ersetzt den komplizierten und unfertigen .plane-button.
+    Er ist einfacher, funktional und passt viel besser zum Thema.
+  */
+  .elegant-button {
+    @apply px-8 py-3 rounded-lg font-semibold text-white transition-all duration-300 ease-in-out;
+    background-color: #8fab8c; /* Ein gedeckter, eleganter Grünton */
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    border: none;
+    outline-color: #7eaa79; /* Für den Focus-Ring */
   }
 
-  /* Define the keyframes for the animation */
-  @keyframes flyAway {
-    0% {
-      /* Initial state of the button */
-      /* Define the initial state properties */
-    }
-    100% {
-      /* Final state of the button */
-      /* Define the final state properties */
-    }
+  .elegant-button:hover {
+    @apply cursor-pointer;
+    background-color: #7eaa79; /* Etwas heller beim Hover */
+    transform: translateY(-3px); /* Leichter Schwebe-Effekt */
+    box-shadow: 0 6px 20px rgba(126, 170, 121, 0.4);
   }
-  
-  .newsletter-form button:not(.active) {
-    background: var(--primary);
+
+  .elegant-button:active {
+    transform: translateY(-1px); /* Klick-Effekt */
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+  }
+
+  /* Optional: Ein "Success"-Zustand für den Button, nachdem das Formular gesendet wurde */
+  .elegant-button.success {
+    background-color: #6a8e66;
+    cursor: not-allowed;
   }
 }
