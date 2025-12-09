@@ -4,67 +4,63 @@ import { useEffect } from "react";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import LeafAnimation from "../components/LeafAnimation";
-import Form from "@/components/Form"; // Angenommen, diese Komponente verwendet den neuen Button
+import Form from "@/components/Form";
 
 gsap.registerPlugin(ScrollTrigger);
 
 export default function Home() {
   useEffect(() => {
     if (typeof window !== "undefined") {
-      // Verbesserte, natürlichere Blatt-Animation
       gsap.to(".leaf", {
         scrollTrigger: {
-          trigger: "body", // Löst die Animation über die gesamte Seite aus
+          trigger: "body",
           start: "top top",
           end: "bottom bottom",
-          scrub: 1.5, // Etwas sanfteres "Scrubbing"
+          scrub: 2,
         },
-        y: "80vh",   // Bewegt sich auch nach unten
-        x: () => Math.random() * 200 - 100, // Zufällige seitliche Bewegung
-        rotation: () => Math.random() * 360, // Zufällige Rotation
-        ease: "power1.inOut", // Weiche Beschleunigung und Abbremsung
+        y: "80vh",
+        x: () => Math.random() * 250 - 125,
+        rotation: () => Math.random() * 360,
+        ease: "power1.inOut",
       });
     }
   }, []);
 
   return (
-    // Der relative Container kann bleiben
-    <div className="relative min-h-screen">
-      {/* Das Hintergrund-SVG ist eine tolle Idee */}
+    <div className="relative min-h-screen overflow-hidden">
       <div className="fixed inset-0 z-0 pointer-events-none">
         <img
           src="/InviteCard.svg"
-          className="object-cover w-full h-full opacity-80" // Leicht transparent für einen weicheren Look
-          alt="Hintergrund-Design"
+          className="object-cover w-full h-full opacity-40 mix-blend-multiply"
+          alt="Background"
         />
       </div>
 
-      <main className="relative z-10 flex flex-col items-center justify-center p-6 sm:p-10 min-h-screen">
+      <main className="relative z-10 flex flex-col items-center justify-center min-h-screen p-6 sm:p-10 gap-8">
         <LeafAnimation />
         
-        {/* Verbesserter Text-Container für einen edleren Look */}
-        <div
-          className="text-center space-y-4 text-gray-800
-            bg-white/70 backdrop-blur-sm
-            p-6 sm:p-8 rounded-xl shadow-lg" // Größerer Radius und weicherer Schatten
-        >
-          {/* Die importierte Schriftart hier anwenden */}
-          <h2
-            style={{ fontFamily: "'Lucida Handwriting', cursive" }}
-            className="text-3xl md:text-4xl lg:text-5xl"
-          >
-            Wir laden dich herzlich zu unserer
+        <div className="glass-card px-8 py-12 sm:px-12 text-center max-w-lg w-full fade-in-up">
+          <h2 className="text-2xl sm:text-3xl text-[#5c7c59] mb-4">
+            Wir laden dich herzlich ein zur
           </h2>
-          <h1 className="text-3xl md:text-4xl lg:text-5xl font-serif mt-2">
-            Hochzeitsfeier ein
+          
+          <h1 className="text-5xl sm:text-6xl text-[#2d3748] mb-10 leading-tight">
+            Hochzeitsfeier
           </h1>
-          <p className="text-xl md:text-2xl font-serif !mt-8"> {/* !mt-8 überschreibt space-y-4 für mehr Abstand */}
-            Datum: <strong>11. Oktober 2024</strong> <br />
-            Ort: <strong>Iserlohn, 58636</strong>
-          </p>
+          
+          <div className="space-y-3 text-xl tracking-wide border-t border-[#8fab8c]/30 pt-8">
+            <p>
+              <span className="font-semibold text-[#5c7c59]">Datum:</span> 11. Oktober 2024
+            </p>
+            <p>
+              <span className="font-semibold text-[#5c7c59]">Ort:</span> Iserlohn, 58636
+            </p>
+          </div>
         </div>
         
-        <Form /> {/* Stelle sicher, dass der Button in dieser Komponente die Klasse .elegant-button erhält */}
+        <div className="w-full max-w-lg fade-in-up" style={{ animationDelay: '0.2s' }}>
+          <Form />
+        </div>
       </main>
     </div>
   );
