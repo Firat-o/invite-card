@@ -19,7 +19,10 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="de">
-      <body className={inter.className}>{children}</body>
+      {/* HIER: suppressHydrationWarning hinzufügen, damit die Console sauber bleibt */}
+      <body className={inter.className} suppressHydrationWarning>
+        {children}
+      </body>
     </html>
   );
 }
