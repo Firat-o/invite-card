@@ -75,9 +75,13 @@ export default function Home() {
           </div>
 
           <div className="font-sans text-sm tracking-wide text-[#2d3748] border-y border-[#5c7c59]/20 py-6 mb-10 flex flex-col gap-2">
-             <p><span className="font-bold">11. OKTOBER 2024</span> — 14:00 UHR</p>
-             <p>SCHLOSS ISERLOHN — 58636</p>
-          </div>
+   <p><span className="font-bold">11. OKTOBER 2024</span> — 14:00 UHR</p>
+   <p>SCHLOSS ISERLOHN — 58636</p>
+   {/* NEU: DEADLINE */}
+   <p className="text-[10px] text-[#5c7c59] uppercase tracking-[0.2em] mt-2 font-bold opacity-80">
+     U.A.w.g. bis 01. September
+   </p>
+</div>
 
           <Form />
 
