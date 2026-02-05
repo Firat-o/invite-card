@@ -90,10 +90,19 @@ export default function Home() {
       {/* === NEU: ADMIN / DEMO BUTTON (Unten Rechts) === */}
       <Link 
         href="/admin/login" 
-        className="fixed bottom-6 right-6 z-50 flex items-center gap-2 px-4 py-2 bg-white/50 backdrop-blur-md border border-[#5c7c59]/20 rounded-full text-[10px] uppercase tracking-widest text-[#5c7c59] hover:bg-[#5c7c59] hover:text-white transition-all duration-300 shadow-sm hover:shadow-lg opacity-60 hover:opacity-100 group"
+        className="fixed bottom-6 right-6 z-50 flex items-center gap-3 px-5 py-3 
+                   bg-[#5c7c59] text-white rounded-full 
+                   shadow-xl shadow-[#5c7c59]/30 
+                   hover:scale-105 hover:bg-[#4a6347] active:scale-95
+                   transition-all duration-300 group"
       >
-        <LockClosedIcon className="w-3 h-3 group-hover:scale-110 transition-transform" />
-        <span>Admin Demo</span>
+        <div className="bg-white/20 p-1 rounded-full">
+           <LockClosedIcon className="w-4 h-4" />
+        </div>
+        <div className="flex flex-col items-start leading-none">
+          <span className="text-[8px] uppercase tracking-widest opacity-80">Portfolio</span>
+          <span className="text-[10px] font-bold uppercase tracking-widest">Admin Demo</span>
+        </div>
       </Link>
 
     </div>
