@@ -1,15 +1,13 @@
 import type { Metadata } from "next";
-import { Inter } from "next/font/google";
+import { Inter, Playfair_Display } from "next/font/google";
 import "./globals.css";
 
-const inter = Inter({ subsets: ["latin"] });
+const inter = Inter({ subsets: ["latin"], variable: "--font-sans" });
+const playfair = Playfair_Display({ subsets: ["latin"], variable: "--font-serif" }); 
 
 export const metadata: Metadata = {
   title: "Hochzeitseinladung",
   description: "Wir laden dich herzlich ein",
-  icons: {
-    icon: "/favicon.ico",
-  },
 };
 
 export default function RootLayout({
@@ -19,8 +17,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="de">
-      {/* HIER: suppressHydrationWarning hinzufügen, damit die Console sauber bleibt */}
-      <body className={inter.className} suppressHydrationWarning>
+      <body className={`${inter.variable} ${playfair.variable} antialiased bg-[#F5F5F0] text-[#1a1a1a]`} suppressHydrationWarning>
         {children}
       </body>
     </html>
