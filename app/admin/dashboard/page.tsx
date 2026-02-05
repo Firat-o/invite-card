@@ -4,9 +4,8 @@ import { useEffect, useState } from "react";
 import { onAuthStateChanged, signOut } from "firebase/auth";
 import { auth, db } from "@/firebase/firebase";
 import { collection, getDocs, query, orderBy, deleteDoc, doc, writeBatch } from "firebase/firestore";
-import { TrashIcon } from "@heroicons/react/24/outline";
+import { TrashIcon, ArrowLeftStartOnRectangleIcon } from "@heroicons/react/24/outline";
 import { useRouter } from "next/navigation";
-import { ArrowLeftStartOnRectangleIcon } from "@heroicons/react/24/outline";
 
 interface Guest {
   id: string;
@@ -54,6 +53,40 @@ export default function Dashboard() {
     router.push("/admin/login");
   };
 
+  // --- NEU: Funktion zum Löschen aller Gäste ---
+  const handleDeleteAll = async () => {
+    const confirmDelete = window.confirm(
+      "⚠️ ACHTUNG: Willst du wirklich ALLE Gäste unwiderruflich löschen?\n\nDies kann nicht rückgängig gemacht werden!"
+    );
+    
+    if (!confirmDelete) return;
+
+    setLoading(true);
+
+    try {
+      const q = query(collection(db, "users"));
+      const snapshot = await getDocs(q);
+
+      // Batch für effizientes Löschen nutzen
+      const batch = writeBatch(db);
+      
+      snapshot.docs.forEach((document) => {
+        batch.delete(doc(db, "users", document.id));
+      });
+
+      await batch.commit();
+
+      // Tabelle sofort leeren
+      setGuests([]); 
+      
+    } catch (error) {
+      console.error("Fehler beim Löschen:", error);
+      alert("Fehler beim Löschen der Daten.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
   // Berechnung der Gesamtgästezahl
   const totalGuests = guests.length + guests.filter(g => g.guest && g.guest.trim() !== "").length;
 
@@ -70,9 +103,24 @@ export default function Dashboard() {
             Gesamtanzahl: <span className="font-bold text-lg">{totalGuests}</span> Personen
           </p>
         </div>
-        <button onClick={handleLogout} className="text-xs uppercase tracking-widest hover:text-[#5c7c59] flex items-center gap-2">
-          Logout <ArrowLeftStartOnRectangleIcon className="w-4 h-4"/>
-        </button>
+        
+        {/* Button Gruppe (Reset & Logout) */}
+        <div className="flex items-center gap-4">
+          {/* Zeige Reset-Button nur, wenn Gäste da sind */}
+          {guests.length > 0 && (
+            <button 
+              onClick={handleDeleteAll} 
+              className="text-xs uppercase tracking-widest text-red-400 hover:text-red-600 border border-red-200 hover:border-red-500 px-3 py-2 transition-colors flex items-center gap-2 rounded-sm"
+            >
+              <TrashIcon className="w-4 h-4"/>
+              Reset DB
+            </button>
+          )}
+
+          <button onClick={handleLogout} className="text-xs uppercase tracking-widest hover:text-[#5c7c59] flex items-center gap-2">
+            Logout <ArrowLeftStartOnRectangleIcon className="w-4 h-4"/>
+          </button>
+        </div>
       </header>
 
       {/* Table Card */}
