@@ -134,6 +134,7 @@ export default function Dashboard() {
           <table className="w-full text-left text-sm">
             <thead className="bg-[#5c7c59]/5 uppercase tracking-wider text-xs text-[#5c7c59]">
               <tr>
+                <th className="px-6 py-4 font-semibold w-10">Status</th> {/* NEU */}
                 <th className="px-6 py-4 font-semibold">Name</th>
                 <th className="px-6 py-4 font-semibold">Begleitung</th>
                 <th className="px-6 py-4 font-semibold text-right">Angemeldet am</th>
