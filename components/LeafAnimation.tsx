@@ -6,49 +6,57 @@ gsap.registerPlugin(ScrollTrigger);
 
 const LeafAnimation = () => {
   useEffect(() => {
-    // Stellt sicher, dass der Code nur im Browser ausgeführt wird
     if (typeof window !== "undefined") {
+      // Wähle alle Elemente mit der Klasse .orb aus (umbenannt von .leaf)
+      const orbs = gsap.utils.toArray(".orb");
 
-      // Wähle alle Elemente mit der Klasse .leaf aus
-      const leaves = gsap.utils.toArray(".leaf");
-
-      // Gehe durch jedes Blatt und gib ihm eine EIGENE, ZUFÄLLIGE Animation
-      leaves.forEach((leaf) => {
-        gsap.to(leaf as Element, { // Hier wird jedes "leaf" einzeln animiert
+      orbs.forEach((orb) => {
+        gsap.to(orb as Element, {
           scrollTrigger: {
-            trigger: "body", // Wir nutzen den body als stabilen Trigger für die ganze Seite
-            start: "top top", // Animation beginnt, wenn der Seitenanfang oben ist
-            end: "bottom bottom", // und endet, wenn das Seitenende unten ist
-            scrub: 1.5, // Die Animation folgt dem Scrollen mit einer leichten Verzögerung -> "smoother"
+            trigger: "body",
+            start: "top top",
+            end: "bottom bottom",
+            scrub: 2, // Etwas langsamerer Scrub für weichere Bewegung
           },
-          // Zufällige Werte für eine natürliche Bewegung
-          x: gsap.utils.random(-200, 200), // Bewegt sich zufällig nach links oder rechts
-          y: gsap.utils.random(-50, 250),  // Bewegt sich auch zufällig nach oben oder unten
-          rotation: gsap.utils.random(-180, 180), // Rotiert in eine zufällige Richtung
-          scale: gsap.utils.random(0.8, 1.2),     // Ändert leicht die Größe
-          ease: "power1.inOut", // Sorgt für sanfte Beschleunigung und Abbremsung
+          // Wir bewegen die Orbs weiter, da sie größer und subtiler sind
+          x: gsap.utils.random(-300, 300),
+          y: gsap.utils.random(-100, 400),
+          scale: gsap.utils.random(0.5, 1.5), // Stärkere Skalierungseffekte
+          // Rotation ist bei Kreisen nicht nötig, kann aber für minimale Varianz drin bleiben
+          rotation: gsap.utils.random(-180, 180), 
+          ease: "power1.inOut",
         });
       });
     }
   }, []);
 
   return (
-    // Der Container bleibt unsichtbar für Mausklicks
-    <div className="fixed inset-0 pointer-events-none z-20"> {/* z-20, um über dem Text-BG zu sein */}
+    // Der Container bleibt unsichtbar für Mausklicks, aber liegt HINTER dem Inhalt (z-0)
+    // Damit die Lichter den Text nicht überlagern, sondern im Hintergrund glühen.
+    <div className="fixed inset-0 pointer-events-none z-0 overflow-hidden">
       
-      {/* Oberes Blatt: Einzigartige Startposition und Skalierung */}
-      <div className="leaf absolute top-[5%] left-[10%] w-24 h-24 md:w-32 md:h-32">
-        <img src="/leaf.svg" alt="Fallendes Blatt" className="transform -scale-x-100" />
+      {/* NEU: Statt Bildern nutzen wir "Orbs".
+         Das sind div-Container mit extremem Weichzeichner (blur) und geringer Deckkraft.
+      */}
+
+      {/* Orb 1: Oben Links - Groß und sehr weich */}
+      <div className="orb absolute -top-[10%] -left-[10%] w-64 h-64 md:w-96 md:h-96">
+        <div className="w-full h-full rounded-full bg-[#5c7c59] opacity-20 blur-[60px] mix-blend-multiply"></div>
       </div>
 
-      {/* Unteres Blatt: Andere Position und Startrotation */}
-      <div className="leaf absolute bottom-[10%] right-[5%] w-20 h-20 md:w-28 md:h-28">
-        <img src="/leaf.svg" alt="Fallendes Blatt" className="transform rotate-45" />
+      {/* Orb 2: Unten Rechts - Etwas kleiner, anderer Fokus */}
+      <div className="orb absolute bottom-[5%] right-[0%] w-48 h-48 md:w-72 md:h-72">
+        <div className="w-full h-full rounded-full bg-[#5c7c59] opacity-25 blur-[50px] mix-blend-multiply"></div>
       </div>
 
-      {/* Zusätzliches drittes Blatt für mehr Dynamik */}
-      <div className="leaf hidden lg:block absolute top-[40%] right-[15%] w-16 h-16 opacity-70">
-        <img src="/leaf.svg" alt="Fallendes Blatt" className="transform rotate-12" />
+      {/* Orb 3: Mitte Rechts - Subtiler Akzent (auch auf Mobile sichtbar) */}
+      <div className="orb absolute top-[40%] -right-[5%] w-32 h-32 md:w-56 md:h-56 opacity-60">
+        <div className="w-full h-full rounded-full bg-[#5c7c59] opacity-15 blur-[40px] mix-blend-multiply"></div>
+      </div>
+       
+       {/* Orb 4: Zusatz für Desktop unten links */}
+      <div className="orb hidden lg:block absolute bottom-[20%] left-[10%] w-40 h-40 opacity-50">
+         <div className="w-full h-full rounded-full bg-[#5c7c59] opacity-10 blur-[40px] mix-blend-multiply"></div>
       </div>
 
     </div>
