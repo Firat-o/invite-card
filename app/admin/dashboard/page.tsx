@@ -10,7 +10,8 @@ import { useRouter } from "next/navigation";
 interface Guest {
   id: string;
   name: string;
-  guest: string; // Begleitung
+  guest: string;
+  status?: "accepted" | "declined"; // NEU
   timestamp: any;
 }
 
