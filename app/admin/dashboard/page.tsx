@@ -17,6 +17,7 @@ interface Guest {
 export default function Dashboard() {
   const [guests, setGuests] = useState<Guest[]>([]);
   const [loading, setLoading] = useState(true);
+  const [userEmail, setUserEmail] = useState<string | null>(null); // NEU: Speichert die Email
   const router = useRouter();
 
   // 1. Auth Check & Data Fetch
@@ -25,6 +26,7 @@ export default function Dashboard() {
       if (!user) {
         router.push("/admin/login");
       } else {
+        setUserEmail(user.email); // NEU: Email speichern
         await fetchGuests();
       }
     });
@@ -53,7 +55,6 @@ export default function Dashboard() {
     router.push("/admin/login");
   };
 
-  // --- NEU: Funktion zum Löschen aller Gäste ---
   const handleDeleteAll = async () => {
     const confirmDelete = window.confirm(
       "⚠️ ACHTUNG: Willst du wirklich ALLE Gäste unwiderruflich löschen?\n\nDies kann nicht rückgängig gemacht werden!"
@@ -67,7 +68,6 @@ export default function Dashboard() {
       const q = query(collection(db, "users"));
       const snapshot = await getDocs(q);
 
-      // Batch für effizientes Löschen nutzen
       const batch = writeBatch(db);
       
       snapshot.docs.forEach((document) => {
@@ -75,8 +75,6 @@ export default function Dashboard() {
       });
 
       await batch.commit();
-
-      // Tabelle sofort leeren
       setGuests([]); 
       
     } catch (error) {
@@ -89,6 +87,10 @@ export default function Dashboard() {
 
   // Berechnung der Gesamtgästezahl
   const totalGuests = guests.length + guests.filter(g => g.guest && g.guest.trim() !== "").length;
+
+  // NEU: Logik, um den Button zu verstecken
+  // Der Button wird NICHT angezeigt, wenn die Email "admin@firat-portfolio.de" ist
+  const isDemoUser = userEmail === "admin@firat-portfolio.de";
 
   if (loading) return <div className="h-screen flex items-center justify-center bg-[#F5F5F0] text-[#5c7c59]">Lade Daten...</div>;
 
@@ -104,10 +106,12 @@ export default function Dashboard() {
           </p>
         </div>
         
-        {/* Button Gruppe (Reset & Logout) */}
         <div className="flex items-center gap-4">
-          {/* Zeige Reset-Button nur, wenn Gäste da sind */}
-          {guests.length > 0 && (
+          
+          {/* HIER IST DIE MAGIE: 
+              Zeige den Button nur, wenn Gäste da sind UND es NICHT der Demo-User ist. 
+          */}
+          {guests.length > 0 && !isDemoUser && (
             <button 
               onClick={handleDeleteAll} 
               className="text-xs uppercase tracking-widest text-red-400 hover:text-red-600 border border-red-200 hover:border-red-500 px-3 py-2 transition-colors flex items-center gap-2 rounded-sm"
