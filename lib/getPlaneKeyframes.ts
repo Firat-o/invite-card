@@ -67,7 +67,9 @@ export const getPlaneKeyframes = (
       "--plane-opacity": 0,
       duration: 0.375,
       onComplete() {
-        setTimeout(() => {
+        // HIER GEÄNDERT: gsap.delayedCall statt setTimeout
+        // Das sorgt dafür, dass die Animation synchron zur GSAP-Zeit läuft
+        gsap.delayedCall(2.5, () => {
           button.removeAttribute("style");
 
           fromTo(
@@ -80,11 +82,11 @@ export const getPlaneKeyframes = (
               duration: 0.3,
               onComplete() {
                 setActive(false);
-                setInput("");
+                setInput(""); // Input leeren
               },
             }
           );
-        }, 2500);
+        });
       },
     },
   ];
