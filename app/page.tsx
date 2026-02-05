@@ -6,6 +6,8 @@ import { ScrollTrigger } from "gsap/ScrollTrigger";
 import LeafAnimation from "../components/LeafAnimation"; 
 import Form from "@/components/Form";
 import { motion } from "framer-motion";
+import Link from "next/link"; // NEU
+import { LockClosedIcon } from "@heroicons/react/24/outline"; // NEU
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -30,10 +32,12 @@ export default function Home() {
   return (
     <div className="relative min-h-screen w-full overflow-hidden bg-[#F5F5F0]">
       
+      {/* 1. Grain Overlay (Texture) */}
       <div className="fixed inset-0 pointer-events-none z-50 opacity-[0.03] mix-blend-multiply" 
            style={{ backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E")` }}>
       </div>
 
+      {/* 2. Background Image */}
       <div className="fixed inset-0 z-0 pointer-events-none">
         <img
           src="/InviteCard.svg"
@@ -43,6 +47,7 @@ export default function Home() {
         <div className="absolute inset-0 bg-radial-gradient from-transparent via-transparent to-[#F5F5F0]/80" />
       </div>
 
+      {/* 3. Main Content - Unified Glass Card */}
       <main className="relative z-10 flex flex-col items-center justify-center min-h-screen p-4 sm:p-8">
         <LeafAnimation />
         
@@ -52,6 +57,7 @@ export default function Home() {
           transition={{ duration: 1.2, ease: [0.22, 1, 0.36, 1] }}
           className="w-full max-w-[500px] bg-white/40 backdrop-blur-xl border border-white/40 shadow-2xl shadow-[#5c7c59]/10 p-8 sm:p-12 md:p-16 text-center relative overflow-hidden"
         >
+          {/* Dekorative Linie oben */}
           <div className="absolute top-0 left-1/2 -translate-x-1/2 w-20 h-1 bg-[#5c7c59]" />
 
           <div className="mb-12 space-y-6">
@@ -80,6 +86,16 @@ export default function Home() {
           </div>
         </motion.div>
       </main>
+
+      {/* === NEU: ADMIN / DEMO BUTTON (Unten Rechts) === */}
+      <Link 
+        href="/admin/login" 
+        className="fixed bottom-6 right-6 z-50 flex items-center gap-2 px-4 py-2 bg-white/50 backdrop-blur-md border border-[#5c7c59]/20 rounded-full text-[10px] uppercase tracking-widest text-[#5c7c59] hover:bg-[#5c7c59] hover:text-white transition-all duration-300 shadow-sm hover:shadow-lg opacity-60 hover:opacity-100 group"
+      >
+        <LockClosedIcon className="w-3 h-3 group-hover:scale-110 transition-transform" />
+        <span>Admin Demo</span>
+      </Link>
+
     </div>
   );
 }
