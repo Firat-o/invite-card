@@ -4,16 +4,28 @@ import { useEffect, useState } from "react";
 import { onAuthStateChanged, signOut } from "firebase/auth";
 import { auth, db } from "@/firebase/firebase";
 import { collection, getDocs, query, orderBy, deleteDoc, doc, writeBatch } from "firebase/firestore";
-import { TrashIcon, ArrowLeftStartOnRectangleIcon, ArrowLeftIcon } from "@heroicons/react/24/outline";
+import { TrashIcon, ArrowLeftStartOnRectangleIcon, ArrowLeftIcon, UserIcon, SparklesIcon, UsersIcon } from "@heroicons/react/24/outline";
 import { useRouter } from "next/navigation";
 import Link from "next/link"; 
 
+// --- INTERFACE UPDATE ---
+// Damit verstehen wir alte UND neue Daten
 interface Guest {
   id: string;
   name: string;
-  guest: string; 
   status?: "accepted" | "declined";
   timestamp: any;
+  
+  // Alte Datenstruktur (Fallback)
+  guest?: string; 
+  guestType?: string;
+  
+  // Neue Datenstruktur (Family Form)
+  guests?: {
+    adults: number;
+    children: number;
+    names: string;
+  };
 }
 
 export default function Dashboard() {
@@ -24,12 +36,8 @@ export default function Dashboard() {
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
-      if (!user) {
-        router.push("/admin/login");
-      } else {
-        setUserEmail(user.email);
-        await fetchGuests();
-      }
+      if (!user) { router.push("/admin/login"); } 
+      else { setUserEmail(user.email); await fetchGuests(); }
     });
     return () => unsubscribe();
   }, [router]);
@@ -37,168 +45,198 @@ export default function Dashboard() {
   const fetchGuests = async () => {
     try {
       const q = query(collection(db, "users"), orderBy("timestamp", "desc"));
-      const querySnapshot = await getDocs(q);
-      const guestsData = querySnapshot.docs.map((doc) => ({
-        id: doc.id,
-        ...doc.data(),
-      })) as Guest[];
+      const snapshot = await getDocs(q);
+      const guestsData = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() })) as Guest[];
       setGuests(guestsData);
-    } catch (error) {
-      console.error("Error loading guests:", error);
-    } finally {
-      setLoading(false);
-    }
+    } catch (e) { console.error(e); } 
+    finally { setLoading(false); }
   };
 
-  const handleLogout = async () => {
-    await signOut(auth);
-    router.push("/admin/login");
-  };
+  const handleLogout = async () => { await signOut(auth); router.push("/admin/login"); };
 
   const handleDeleteAll = async () => {
-    const confirmDelete = window.confirm(
-      "⚠️ ACHTUNG: Willst du wirklich ALLE Gäste unwiderruflich löschen?\n\nDies kann nicht rückgängig gemacht werden!"
-    );
-    if (!confirmDelete) return;
+    if (!window.confirm("⚠️ ACHTUNG: Wirklich ALLES löschen?")) return;
     setLoading(true);
     try {
       const q = query(collection(db, "users"));
       const snapshot = await getDocs(q);
       const batch = writeBatch(db);
-      snapshot.docs.forEach((document) => batch.delete(doc(db, "users", document.id)));
+      snapshot.docs.forEach((d) => batch.delete(doc(db, "users", d.id)));
       await batch.commit();
       setGuests([]); 
-    } catch (error) {
-      alert("Fehler beim Löschen.");
-    } finally {
-      setLoading(false);
-    }
+    } catch(e) { alert("Fehler"); }
+    finally { setLoading(false); }
   };
 
-  // --- SMARTE GÄSTE ZÄHLUNG ---
-  // Filtert "niemand", "keine", "-" etc. heraus
-  const countGuests = (g: Guest) => {
-    if (g.status === "declined") return 0;
-    const guestName = g.guest?.trim().toLowerCase() || "";
-    // Liste von Wörtern, die NICHT als Gast zählen sollen
-    const invalidGuests = ["", "-", "niemand", "keine", "no one", "none", "nein"];
-    return 1 + (invalidGuests.includes(guestName) ? 0 : 1);
-  };
+  // --- INTELLIGENTE BERECHNUNG ---
+  const activeGuests = guests.filter(g => g.status !== "declined");
+  
+  // 1. Zähle die Haupt-Anmelder (immer 1 pro Zeile)
+  const mainGuestsCount = activeGuests.length;
 
-  const totalCount = guests.reduce((acc, curr) => acc + countGuests(curr), 0);
+  // 2. Zähle zusätzliche Erwachsene (Unterscheide alt vs. neu)
+  const extraAdultsCount = activeGuests.reduce((sum, g) => {
+    // Neu: Explizite Anzahl
+    if (g.guests?.adults !== undefined) return sum + g.guests.adults;
+    // Alt: Wenn Text da ist und Typ nicht 'Kind' -> +1
+    if (g.guest && g.guest.trim() !== "" && g.guestType !== 'child') return sum + 1;
+    return sum;
+  }, 0);
+
+  // 3. Zähle Kinder
+  const childrenCount = activeGuests.reduce((sum, g) => {
+    // Neu
+    if (g.guests?.children !== undefined) return sum + g.guests.children;
+    // Alt
+    if (g.guestType === 'child') return sum + 1;
+    return sum;
+  }, 0);
+
+  const totalAdults = mainGuestsCount + extraAdultsCount;
+  const totalAll = totalAdults + childrenCount;
+
   const isDemoUser = userEmail === "admin@firat-portfolio.de";
 
   if (loading) return <div className="h-screen flex items-center justify-center bg-[#F5F5F0] text-[#5c7c59]">Lade Daten...</div>;
 
   return (
-    <div className="min-h-screen bg-[#F5F5F0] p-6 sm:p-12 font-sans text-[#2d3748]">
+    <div className="min-h-screen bg-[#F5F5F0] p-4 sm:p-12 font-sans text-[#2d3748]">
       
-      {/* HEADER NAVIGATION */}
-      <div className="max-w-4xl mx-auto mb-8 flex justify-between items-center">
-        <Link 
-          href="/" 
-          className="inline-flex items-center gap-2 px-4 py-2 bg-white/50 hover:bg-white border border-[#5c7c59]/10 rounded-full text-xs font-bold uppercase tracking-widest text-[#5c7c59] transition-all shadow-sm hover:shadow-md group"
-        >
-          <ArrowLeftIcon className="w-3 h-3 group-hover:-translate-x-1 transition-transform" />
-          <span>Zurück zur Einladung</span>
+      {/* HEADER NAV */}
+      <div className="max-w-5xl mx-auto mb-6 flex justify-between items-center">
+        <Link href="/" className="inline-flex items-center gap-2 text-[10px] sm:text-xs font-bold uppercase tracking-widest text-[#5c7c59]/60 hover:text-[#5c7c59] transition-colors">
+          <ArrowLeftIcon className="w-3 h-3" /> <span className="hidden sm:inline">Zurück zur Einladung</span><span className="sm:hidden">Zurück</span>
         </Link>
-
-        <button onClick={handleLogout} className="text-xs uppercase tracking-widest text-[#5c7c59]/60 hover:text-[#5c7c59] flex items-center gap-2 transition-colors">
+        <button onClick={handleLogout} className="text-[10px] sm:text-xs uppercase tracking-widest text-[#5c7c59]/60 hover:text-[#5c7c59] flex items-center gap-2">
           Logout <ArrowLeftStartOnRectangleIcon className="w-4 h-4"/>
         </button>
       </div>
 
-      {/* DASHBOARD CARD */}
-      <div className="max-w-4xl mx-auto">
-        <div className="flex flex-col md:flex-row justify-between items-end mb-6 gap-4">
-           <div>
-            <h1 className="font-serif text-4xl text-[#1a1a1a] mb-2">Gästeliste</h1>
-            <p className="text-sm uppercase tracking-widest text-[#5c7c59]">
-              Aktuelle Zusagen: <span className="font-bold text-lg">{totalCount}</span> Personen
-            </p>
+      <div className="max-w-5xl mx-auto mb-8">
+        
+        {/* STATISTIK HEADER (Mobile Responsive: Flex-Col) */}
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-end mb-8 gap-6 border-b border-[#5c7c59]/10 pb-6">
+           <div className="w-full">
+            <h1 className="font-serif text-3xl sm:text-4xl text-[#1a1a1a] mb-4">Gästeliste</h1>
+            
+            {/* KPI KARTEN */}
+            <div className="grid grid-cols-3 gap-2 sm:gap-4 w-full md:w-auto">
+              {/* Gesamt */}
+              <div className="bg-[#5c7c59] text-white p-3 rounded-sm shadow-lg shadow-[#5c7c59]/20 flex flex-col items-center justify-center">
+                <span className="text-xl sm:text-2xl font-serif font-bold leading-none">{totalAll}</span>
+                <span className="text-[8px] sm:text-[10px] uppercase tracking-widest opacity-80 mt-1">Gesamt</span>
+              </div>
+              
+              {/* Erwachsene */}
+              <div className="bg-white border border-[#5c7c59]/20 text-[#5c7c59] p-3 rounded-sm flex flex-col items-center justify-center">
+                <div className="flex items-center gap-1">
+                  <span className="text-xl sm:text-2xl font-serif font-bold leading-none">{totalAdults}</span>
+                  <UserIcon className="w-4 h-4 mb-1 opacity-50"/>
+                </div>
+                <span className="text-[8px] sm:text-[10px] uppercase tracking-widest opacity-60 mt-1">Erw.</span>
+              </div>
+
+              {/* Kinder */}
+              <div className="bg-white border border-[#5c7c59]/20 text-[#5c7c59] p-3 rounded-sm flex flex-col items-center justify-center">
+                <div className="flex items-center gap-1">
+                  <span className="text-xl sm:text-2xl font-serif font-bold leading-none">{childrenCount}</span>
+                  <SparklesIcon className="w-4 h-4 mb-1 opacity-50"/>
+                </div>
+                <span className="text-[8px] sm:text-[10px] uppercase tracking-widest opacity-60 mt-1">Kinder</span>
+              </div>
+            </div>
           </div>
 
+          {/* RESET BUTTON (Nur Desktop oder wenn wichtig) */}
           {guests.length > 0 && !isDemoUser && (
-            <button 
-              onClick={handleDeleteAll} 
-              className="text-xs uppercase tracking-widest text-red-400 hover:text-red-600 border border-red-200 hover:border-red-500 px-4 py-2 transition-colors flex items-center gap-2 rounded-sm"
-            >
-              <TrashIcon className="w-4 h-4"/>
-              Liste leeren
+            <button onClick={handleDeleteAll} className="w-full md:w-auto mt-2 md:mt-0 text-xs text-red-400 hover:text-red-600 border border-red-200 hover:bg-red-50 px-4 py-3 md:py-2 rounded-sm flex items-center justify-center gap-2 transition-all">
+              <TrashIcon className="w-4 h-4"/> Reset Database
             </button>
           )}
         </div>
 
-        {/* TABELLE */}
-        <div className="bg-white shadow-xl shadow-[#5c7c59]/5 border border-[#5c7c59]/10 overflow-hidden rounded-sm">
+        {/* TABELLE (Scrollbar für Mobile) */}
+        <div className="bg-white shadow-xl shadow-[#5c7c59]/5 border border-[#5c7c59]/10 rounded-sm overflow-hidden">
           <div className="overflow-x-auto">
-            <table className="w-full text-left text-sm">
+            <table className="w-full text-left text-sm whitespace-nowrap">
               <thead className="bg-[#5c7c59]/5 uppercase tracking-wider text-xs text-[#5c7c59]">
                 <tr>
-                  {/* FIX: text-center hinzugefügt */}
-                  <th className="px-6 py-4 font-semibold w-20 text-center">Status</th>
-                  <th className="px-6 py-4 font-semibold">Name</th>
-                  <th className="px-6 py-4 font-semibold">Begleitung</th>
-                  <th className="px-6 py-4 font-semibold text-right">Angemeldet am</th>
+                  <th className="px-4 py-4 w-12 text-center">Status</th>
+                  <th className="px-4 py-4 font-semibold">Name</th>
+                  <th className="px-4 py-4 font-semibold">Begleitung</th>
+                  {/* Datum auf Mobile ausblenden wenn zu eng */}
+                  <th className="px-4 py-4 font-semibold text-right hidden sm:table-cell">Angemeldet</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-[#5c7c59]/10">
                 {guests.map((guest) => {
                   const isDeclined = guest.status === 'declined';
                   
+                  // HELPER: Daten normalisieren (Alt vs Neu)
+                  const extraAdults = guest.guests?.adults ?? (guest.guest && guest.guestType !== 'child' ? 1 : 0);
+                  const extraKids = guest.guests?.children ?? (guest.guestType === 'child' ? 1 : 0);
+                  const namesText = guest.guests?.names || guest.guest || "—";
+                  
+                  const hasBegleitung = extraAdults > 0 || extraKids > 0;
+
                   return (
-                    <tr 
-                      key={guest.id} 
-                      // FIX: Style "Editorial Declined" -> Opacity statt Rot
-                      className={`transition-all duration-300 ${
-                        isDeclined 
-                          ? 'bg-gray-50 opacity-50 grayscale hover:opacity-75' 
-                          : 'hover:bg-[#5c7c59]/5'
-                      }`}
-                    >
-                      {/* STATUS ICON */}
-                      <td className="px-6 py-4 text-center">
+                    <tr key={guest.id} className={`transition-all ${isDeclined ? 'bg-gray-50 opacity-40 grayscale' : 'hover:bg-[#5c7c59]/5'}`}>
+                      
+                      {/* STATUS */}
+                      <td className="px-4 py-4 text-center">
+                        <span className={`inline-block w-2.5 h-2.5 rounded-full ${isDeclined ? 'bg-red-400' : 'bg-[#5c7c59]'}`}></span>
+                      </td>
+
+                      {/* NAME */}
+                      <td className={`px-4 py-4 font-medium text-[#1a1a1a] ${isDeclined && 'line-through decoration-gray-400'}`}>
+                        {guest.name}
+                      </td>
+                      
+                      {/* BEGLEITUNG DETAIL */}
+                      <td className="px-4 py-4 text-[#2d3748]/80">
                         {isDeclined ? (
-                          <div className="inline-flex items-center justify-center w-6 h-6 rounded-full border border-red-200 text-red-400">
-                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-3 h-3">
-                              <path fillRule="evenodd" d="M5.47 5.47a.75.75 0 011.06 0L12 10.94l5.47-5.47a.75.75 0 111.06 1.06L13.06 12l5.47 5.47a.75.75 0 11-1.06 1.06L12 13.06l-5.47 5.47a.75.75 0 01-1.06-1.06L10.94 12 5.47 6.53a.75.75 0 010-1.06z" clipRule="evenodd" />
-                            </svg>
-                          </div>
+                          <span className="text-gray-300 text-xs">—</span>
+                        ) : !hasBegleitung ? (
+                          <span className="text-[10px] uppercase tracking-wider text-gray-400 border border-gray-100 px-2 py-1 rounded-full">Solo</span>
                         ) : (
-                          <div className="inline-flex items-center justify-center w-6 h-6 rounded-full bg-[#5c7c59]/20 text-[#5c7c59]">
-                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-3 h-3">
-                              <path fillRule="evenodd" d="M19.916 4.626a.75.75 0 01.208 1.04l-9 13.5a.75.75 0 01-1.154.114l-6-6a.75.75 0 011.06-1.06l5.353 5.353 8.493-12.739a.75.75 0 011.04-.208z" clipRule="evenodd" />
-                            </svg>
+                          <div className="flex flex-col gap-1.5">
+                              {/* BADGES */}
+                              <div className="flex gap-2">
+                                  {extraAdults > 0 && (
+                                      <span className="flex items-center gap-1 text-[10px] font-bold bg-[#5c7c59]/10 text-[#5c7c59] px-2 py-0.5 rounded-full border border-[#5c7c59]/10">
+                                          <UsersIcon className="w-3 h-3"/> +{extraAdults}
+                                      </span>
+                                  )}
+                                  {extraKids > 0 && (
+                                      <span className="flex items-center gap-1 text-[10px] font-bold bg-amber-50 text-amber-600 px-2 py-0.5 rounded-full border border-amber-100">
+                                          <SparklesIcon className="w-3 h-3"/> +{extraKids}
+                                      </span>
+                                  )}
+                              </div>
+                              {/* NAMEN */}
+                              {namesText !== "—" && (
+                                <span className="text-xs text-gray-500 truncate max-w-[150px] sm:max-w-[250px]" title={namesText}>
+                                  {namesText}
+                                </span>
+                              )}
                           </div>
                         )}
                       </td>
 
-                      {/* NAME */}
-                      <td className={`px-6 py-4 font-medium ${isDeclined ? 'line-through decoration-gray-300' : 'text-[#1a1a1a]'}`}>
-                        {guest.name}
-                      </td>
-
-                      {/* BEGLEITUNG */}
-                      <td className="px-6 py-4 text-[#2d3748]/80">
-                         {isDeclined ? "—" : (guest.guest || "—")}
-                      </td>
-
-                      {/* DATUM */}
-                      <td className="px-6 py-4 text-right text-xs text-[#5c7c59]/60 font-mono">
+                      {/* DATUM (Hidden on mobile) */}
+                      <td className="px-4 py-4 text-right text-xs text-[#5c7c59]/60 font-mono hidden sm:table-cell">
                         {guest.timestamp?.seconds 
-                          ? new Date(guest.timestamp.seconds * 1000).toLocaleDateString('de-DE', {
-                              day: '2-digit', month: '2-digit', year: 'numeric' // Format: 05.02.2026
-                            }) 
-                          : "Gerade eben"}
+                          ? new Date(guest.timestamp.seconds * 1000).toLocaleDateString('de-DE', {day: '2-digit', month: '2-digit'}) 
+                          : "Neu"}
                       </td>
                     </tr>
                   );
                 })}
-                
+
                 {guests.length === 0 && (
                   <tr>
                     <td colSpan={4} className="px-6 py-12 text-center text-[#5c7c59]/50 italic">
-                      Die Liste ist noch leer.
+                      Warte auf die erste Anmeldung...
                     </td>
                   </tr>
                 )}
