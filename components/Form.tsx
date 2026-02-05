@@ -4,17 +4,23 @@ import { FormEvent, useState } from "react";
 import { collection, addDoc } from "firebase/firestore";
 import { db } from "../firebase/firebase";
 import { motion, AnimatePresence } from "framer-motion";
-import { CheckCircleIcon, ExclamationCircleIcon, XCircleIcon } from "@heroicons/react/24/outline";
+import { CheckCircleIcon, ExclamationCircleIcon, UserIcon, UserMinusIcon } from "@heroicons/react/24/outline";
+import { SparklesIcon } from "@heroicons/react/24/solid"; // Für Kind
+
+type GuestType = "none" | "adult" | "child";
 
 export default function Form() {
   const [nameInput, setNameInput] = useState("");
-  const [guestInput, setGuestInput] = useState("");
-  const [status, setStatus] = useState<"accepted" | "declined">("accepted"); // NEU: Status
+  const [guestName, setGuestName] = useState("");
+  const [status, setStatus] = useState<"accepted" | "declined">("accepted");
+  const [guestType, setGuestType] = useState<GuestType>("none"); // NEU: Typ der Begleitung
+  
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
   const [error, setError] = useState("");
 
-  const isButtonDisabled = !nameInput || loading || success;
+  // Button ist disabled, wenn Name fehlt ODER (Begleitung gewählt aber kein Name eingetragen)
+  const isButtonDisabled = !nameInput || (guestType !== "none" && !guestName) || loading || success;
 
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -22,29 +28,30 @@ export default function Form() {
 
     setLoading(true);
     setError("");
-    setSuccess(false);
 
     try {
       await addDoc(collection(db, "users"), {
         name: nameInput.trim(),
-        guest: status === "accepted" ? guestInput.trim() : "", // Keine Begleitung bei Absage
-        status: status, // Speichern wir in der DB
+        // Wir speichern Name nur, wenn auch ein Typ gewählt wurde
+        guest: guestType === "none" ? "" : guestName.trim(),
+        guestType: status === "declined" ? "none" : guestType, // Bei Absage keine Begleitung
+        status: status,
         timestamp: new Date(),
       });
 
       setSuccess(true);
       setNameInput("");
-      setGuestInput("");
-      // Status resetten wir nicht sofort, damit das UI ruhig bleibt
+      setGuestName("");
+      setGuestType("none");
 
       setTimeout(() => {
         setSuccess(false);
-        setStatus("accepted"); // Reset nach 5s
+        setStatus("accepted");
       }, 5000);
 
     } catch (e) {
-      console.error("Error adding document:", e);
-      setError("Fehler beim Senden. Bitte versuchen Sie es erneut.");
+      console.error("Error:", e);
+      setError("Fehler beim Senden.");
     } finally {
       setLoading(false);
     }
@@ -53,15 +60,13 @@ export default function Form() {
   return (
     <form onSubmit={handleSubmit} className="w-full space-y-10 mt-8 font-sans">
       
-      {/* === NEU: STATUS WAHL (ZUSAGE / ABSAGE) === */}
+      {/* STATUS TOGGLE */}
       <div className="flex gap-4 justify-center">
         <button
           type="button"
           onClick={() => setStatus("accepted")}
           className={`px-6 py-2 text-xs uppercase tracking-widest border transition-all duration-300 ${
-            status === "accepted" 
-              ? "bg-[#5c7c59] text-white border-[#5c7c59]" 
-              : "text-[#5c7c59]/60 border-[#5c7c59]/20 hover:border-[#5c7c59]"
+            status === "accepted" ? "bg-[#5c7c59] text-white border-[#5c7c59]" : "text-[#5c7c59]/60 border-[#5c7c59]/20 hover:border-[#5c7c59]"
           }`}
         >
           Zusage
@@ -70,77 +75,97 @@ export default function Form() {
           type="button"
           onClick={() => setStatus("declined")}
           className={`px-6 py-2 text-xs uppercase tracking-widest border transition-all duration-300 ${
-            status === "declined" 
-              ? "bg-[#8b4513] text-white border-[#8b4513]" // Rostrot für Absage (passend zum Grün)
-              : "text-[#5c7c59]/60 border-[#5c7c59]/20 hover:border-[#8b4513]/50 hover:text-[#8b4513]"
+            status === "declined" ? "bg-[#8b4513] text-white border-[#8b4513]" : "text-[#5c7c59]/60 border-[#5c7c59]/20 hover:border-[#8b4513]/50 hover:text-[#8b4513]"
           }`}
         >
           Absage
         </button>
       </div>
 
-      {/* === INPUT: NAME === */}
+      {/* INPUT: HAUPTNAME */}
       <div className="relative group z-0 w-full">
         <input
           type="text"
-          id="name"
           value={nameInput}
           onChange={(e) => setNameInput(e.target.value)}
-          pattern="[A-Za-z\u00C0-\u024F\s]*"
           required
           placeholder=" "
-          className="block py-3 px-0 w-full text-base text-center text-[#2d3748] bg-transparent border-0 border-b border-[#5c7c59]/30 appearance-none focus:outline-none focus:ring-0 focus:border-[#5c7c59] peer transition-colors placeholder-transparent"
+          className="block py-3 px-0 w-full text-base text-center text-[#2d3748] bg-transparent border-0 border-b border-[#5c7c59]/30 focus:border-[#5c7c59] focus:outline-none peer transition-colors"
         />
-        <label
-          htmlFor="name"
-          className="absolute text-xs tracking-[0.2em] uppercase text-[#5c7c59]/50 duration-300 transform top-3 -z-10 origin-center left-0 right-0 text-center whitespace-nowrap peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-8 peer-focus:text-[#5c7c59] peer-[:not(:placeholder-shown)]:scale-75 peer-[:not(:placeholder-shown)]:-translate-y-8"
-        >
+        <label className="absolute text-xs tracking-[0.2em] uppercase text-[#5c7c59]/50 duration-300 transform top-3 -z-10 origin-center left-0 right-0 text-center peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:-translate-y-8 peer-focus:text-[#5c7c59] peer-[:not(:placeholder-shown)]:-translate-y-8">
           Dein vollständiger Name
         </label>
       </div>
 
-      {/* === INPUT: BEGLEITUNG (Nur sichtbar bei Zusage) === */}
+      {/* BEGLEITUNG LOGIK (Nur bei Zusage) */}
       <AnimatePresence>
         {status === "accepted" && (
-          <motion.div 
-            initial={{ opacity: 0, height: 0, marginTop: 0 }}
-            animate={{ opacity: 1, height: "auto", marginTop: 40 }}
-            exit={{ opacity: 0, height: 0, marginTop: 0 }}
-            className="relative group z-0 w-full overflow-hidden"
-          >
-            <input
-              type="text"
-              id="guest"
-              value={guestInput}
-              onChange={(e) => setGuestInput(e.target.value)}
-              placeholder=" "
-              className="block py-3 px-0 w-full text-base text-center text-[#2d3748] bg-transparent border-0 border-b border-[#5c7c59]/30 appearance-none focus:outline-none focus:ring-0 focus:border-[#5c7c59] peer transition-colors placeholder-transparent"
-            />
-            <label
-              htmlFor="guest"
-              className="absolute text-xs tracking-[0.2em] uppercase text-[#5c7c59]/50 duration-300 transform top-3 -z-10 origin-center left-0 right-0 text-center whitespace-nowrap peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-8 peer-focus:text-[#5c7c59] peer-[:not(:placeholder-shown)]:scale-75 peer-[:not(:placeholder-shown)]:-translate-y-8"
-            >
-              Begleitung (Optional)
-            </label>
-          </motion.div>
-        )}
-      </AnimatePresence>
-
-      <AnimatePresence>
-        {error && (
-          <motion.div 
+          <motion.div
             initial={{ opacity: 0, height: 0 }}
             animate={{ opacity: 1, height: "auto" }}
             exit={{ opacity: 0, height: 0 }}
-            className="flex justify-center items-center gap-2 text-red-600/80 text-xs font-medium pt-2"
+            className="space-y-6 overflow-hidden"
           >
-            <ExclamationCircleIcon className="w-4 h-4" />
-            <span>{error}</span>
+            {/* 1. TYP AUSWAHL (Segmented Control) */}
+            <div className="flex flex-col items-center gap-3">
+              <span className="text-[10px] uppercase tracking-widest text-[#5c7c59]/40">Begleitung?</span>
+              <div className="flex bg-[#5c7c59]/5 p-1 rounded-full border border-[#5c7c59]/10">
+                
+                <button
+                  type="button"
+                  onClick={() => setGuestType("none")}
+                  className={`flex items-center gap-2 px-4 py-2 rounded-full text-[10px] uppercase font-bold tracking-wider transition-all ${
+                    guestType === "none" ? "bg-white text-[#5c7c59] shadow-sm" : "text-[#5c7c59]/50 hover:text-[#5c7c59]"
+                  }`}
+                >
+                  <UserMinusIcon className="w-3 h-3" /> Solo
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => setGuestType("adult")}
+                  className={`flex items-center gap-2 px-4 py-2 rounded-full text-[10px] uppercase font-bold tracking-wider transition-all ${
+                    guestType === "adult" ? "bg-white text-[#5c7c59] shadow-sm" : "text-[#5c7c59]/50 hover:text-[#5c7c59]"
+                  }`}
+                >
+                  <UserIcon className="w-3 h-3" /> +1 Person
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => setGuestType("child")}
+                  className={`flex items-center gap-2 px-4 py-2 rounded-full text-[10px] uppercase font-bold tracking-wider transition-all ${
+                    guestType === "child" ? "bg-white text-[#5c7c59] shadow-sm" : "text-[#5c7c59]/50 hover:text-[#5c7c59]"
+                  }`}
+                >
+                  <SparklesIcon className="w-3 h-3" /> Kind
+                </button>
+              </div>
+            </div>
+
+            {/* 2. NAME INPUT (Nur wenn Typ gewählt) */}
+            {guestType !== "none" && (
+              <motion.div 
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="relative group z-0 w-full"
+              >
+                <input
+                  type="text"
+                  value={guestName}
+                  onChange={(e) => setGuestName(e.target.value)}
+                  placeholder=" "
+                  className="block py-3 px-0 w-full text-base text-center text-[#2d3748] bg-transparent border-0 border-b border-[#5c7c59]/30 focus:border-[#5c7c59] focus:outline-none peer transition-colors"
+                />
+                <label className="absolute text-xs tracking-[0.2em] uppercase text-[#5c7c59]/50 duration-300 transform top-3 -z-10 origin-center left-0 right-0 text-center peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:-translate-y-8 peer-focus:text-[#5c7c59] peer-[:not(:placeholder-shown)]:-translate-y-8">
+                  {guestType === "child" ? "Name des Kindes" : "Name der Begleitung"}
+                </label>
+              </motion.div>
+            )}
           </motion.div>
         )}
       </AnimatePresence>
 
-      {/* === SUBMIT BUTTON === */}
       <div className="pt-2">
         <motion.button
           whileHover={{ scale: 1.01 }}
@@ -148,25 +173,12 @@ export default function Form() {
           type="submit"
           disabled={isButtonDisabled}
           className={`w-full py-4 uppercase tracking-[0.25em] text-xs font-bold transition-all duration-500 shadow-xl 
-            ${status === "accepted" 
-              ? "bg-[#5c7c59] text-[#F5F5F0] hover:bg-[#4a6347] shadow-[#5c7c59]/10" 
-              : "bg-[#8b4513] text-[#F5F5F0] hover:bg-[#6d360f] shadow-[#8b4513]/10"
-            }
-            ${success ? "!bg-[#5c7c59]" : ""}
+            ${status === "accepted" ? "bg-[#5c7c59] text-white shadow-[#5c7c59]/10" : "bg-[#8b4513] text-white shadow-[#8b4513]/10"}
             disabled:opacity-50 disabled:cursor-not-allowed disabled:shadow-none
           `}
         >
-          {loading ? (
-            <span className="flex items-center justify-center gap-2">
-              <span className="w-1.5 h-1.5 bg-white rounded-full animate-bounce" style={{ animationDelay: "0s" }} />
-              <span className="w-1.5 h-1.5 bg-white rounded-full animate-bounce" style={{ animationDelay: "0.2s" }} />
-              <span className="w-1.5 h-1.5 bg-white rounded-full animate-bounce" style={{ animationDelay: "0.4s" }} />
-            </span>
-          ) : success ? (
-            <span className="flex items-center justify-center gap-2">
-              <CheckCircleIcon className="w-4 h-4" />
-              {status === "accepted" ? "Zusage gesendet" : "Absage gesendet"}
-            </span>
+          {loading ? "..." : success ? (
+            <span className="flex items-center justify-center gap-2"><CheckCircleIcon className="w-4 h-4" /> Gesendet</span>
           ) : (
             status === "accepted" ? "Zusage bestätigen" : "Absage senden"
           )}
