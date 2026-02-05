@@ -1,7 +1,10 @@
-import { EnvelopeIcon, CheckCircleIcon, ExclamationCircleIcon } from "@heroicons/react/24/outline";
+"use client";
+
 import { FormEvent, useState } from "react";
 import { collection, addDoc } from "firebase/firestore";
 import { db } from "../firebase/firebase";
+import { motion, AnimatePresence } from "framer-motion";
+import { CheckCircleIcon, ExclamationCircleIcon } from "@heroicons/react/24/outline";
 
 function Form() {
   const [nameInput, setNameInput] = useState("");
@@ -42,80 +45,93 @@ function Form() {
       setLoading(false);
     }
   };
+  // ------------------------------------------
 
   return (
-    <div className="w-full max-w-md mx-auto mt-12 font-serif">
-      <form onSubmit={handleSubmit} className="flex flex-col gap-y-6">
-        
-        {/* === Vereinfachtes und elegantes Input-Feld für den Namen === */}
-        <div>
-          <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-1">
-            Dein Name
-          </label>
-          <input
-            id="name"
-            value={nameInput}
-            onChange={(e) => setNameInput(e.target.value)}
-            type="text"
-            pattern="[A-Za-z\u00C0-\u024F\s]*"
-            placeholder="Bitte gib deinen vollen Namen ein"
-            required
-            className="w-full px-4 py-3 bg-white/80 border border-gray-300 rounded-lg 
-                       focus:outline-none focus:ring-2 focus:ring-[#7eaa79] focus:border-transparent
-                       transition-all duration-300 placeholder:text-gray-400"
-          />
-        </div>
+    <form onSubmit={handleSubmit} className="w-full space-y-10 mt-8 font-sans">
+      
+      <div className="relative group z-0">
+        <input
+          type="text"
+          id="name"
+          value={nameInput}
+          onChange={(e) => setNameInput(e.target.value)}
+          pattern="[A-Za-z\u00C0-\u024F\s]*"
+          required
+          placeholder=" "
+          className="block py-2.5 px-0 w-full text-sm text-[#2d3748] bg-transparent border-0 border-b border-[#5c7c59]/40 appearance-none focus:outline-none focus:ring-0 focus:border-[#5c7c59] peer transition-colors"
+        />
+        <label
+          htmlFor="name"
+          className="peer-focus:font-medium absolute text-sm text-[#5c7c59]/60 duration-300 transform -translate-y-6 scale-75 top-3 -z-10 origin-[0] peer-focus:start-0 rtl:peer-focus:translate-x-1/4 peer-focus:text-[#5c7c59] peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-6 tracking-wide uppercase"
+        >
+          Dein Vollständiger Name
+        </label>
+      </div>
 
-        {/* === Vereinfachtes und elegantes Input-Feld für die Begleitperson === */}
-        <div>
-          <label htmlFor="guest" className="block text-sm font-medium text-gray-700 mb-1">
-            Deine Begleitung (optional)
-          </label>
-          <input
-            id="guest"
-            value={guestInput}
-            onChange={(e) => setGuestInput(e.target.value)}
-            type="text"
-            placeholder="Name der Begleitperson"
-            className="w-full px-4 py-3 bg-white/80 border border-gray-300 rounded-lg
-                       focus:outline-none focus:ring-2 focus:ring-[#7eaa79] focus:border-transparent
-                       transition-all duration-300 placeholder:text-gray-400"
-          />
-        </div>
+      <div className="relative group z-0">
+        <input
+          type="text"
+          id="guest"
+          value={guestInput}
+          onChange={(e) => setGuestInput(e.target.value)}
+          placeholder=" "
+          className="block py-2.5 px-0 w-full text-sm text-[#2d3748] bg-transparent border-0 border-b border-[#5c7c59]/40 appearance-none focus:outline-none focus:ring-0 focus:border-[#5c7c59] peer transition-colors"
+        />
+        <label
+          htmlFor="guest"
+          className="peer-focus:font-medium absolute text-sm text-[#5c7c59]/60 duration-300 transform -translate-y-6 scale-75 top-3 -z-10 origin-[0] peer-focus:start-0 rtl:peer-focus:translate-x-1/4 peer-focus:text-[#5c7c59] peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-6 tracking-wide uppercase"
+        >
+          Begleitung (Optional)
+        </label>
+      </div>
 
-        {/* === Der neue, saubere Button === */}
-        <button
-          disabled={isButtonDisabled}
+      <AnimatePresence>
+        {error && (
+          <motion.div 
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: "auto" }}
+            exit={{ opacity: 0, height: 0 }}
+            className="flex items-center gap-2 text-red-600/80 text-xs font-medium"
+          >
+            <ExclamationCircleIcon className="w-4 h-4" />
+            <span>{error}</span>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      <div className="pt-4">
+        <motion.button
+          whileHover={{ scale: 1.02 }}
+          whileTap={{ scale: 0.98 }}
           type="submit"
-          // Wir wenden die Klasse .elegant-button aus globals.css an
-          // und nutzen Tailwinds `disabled:`-Modifikator für den Zustand.
-          className="elegant-button w-full flex items-center justify-center gap-x-3
-                     disabled:bg-gray-400 disabled:shadow-none disabled:transform-none disabled:cursor-not-allowed"
+          disabled={isButtonDisabled}
+          className={`w-full py-4 uppercase tracking-[0.25em] text-xs font-bold transition-all duration-500 border
+            ${success 
+              ? "bg-[#5c7c59] text-white border-[#5c7c59]" 
+              : "bg-transparent text-[#5c7c59] border-[#5c7c59] hover:bg-[#5c7c59] hover:text-white"
+            }
+            disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:bg-transparent disabled:hover:text-[#5c7c59]
+          `}
         >
           {loading ? (
-            <span className="loader"></span>
+            <span className="flex items-center justify-center gap-2">
+              <span className="w-2 h-2 bg-current rounded-full animate-bounce" style={{ animationDelay: "0s" }} />
+              <span className="w-2 h-2 bg-current rounded-full animate-bounce" style={{ animationDelay: "0.2s" }} />
+              <span className="w-2 h-2 bg-current rounded-full animate-bounce" style={{ animationDelay: "0.4s" }} />
+            </span>
           ) : success ? (
-            <>
-              <CheckCircleIcon className="w-6 h-6"/>
-              <span>Gesendet!</span>
-            </>
+            <span className="flex items-center justify-center gap-2">
+              <CheckCircleIcon className="w-4 h-4" />
+              WIR FREUEN UNS
+            </span>
           ) : (
-            <>
-              <EnvelopeIcon className="w-6 h-6" />
-              <span>Bestätigen</span>
-            </>
+            "Zusage bestätigen"
           )}
-        </button>
-      </form>
+        </motion.button>
+      </div>
 
-      {/* === Verbesserte Feedback-Nachrichten === */}
-      {error && (
-        <div className="flex items-center gap-x-3 mt-4 p-3 rounded-lg bg-red-100 text-red-800">
-          <ExclamationCircleIcon className="w-6 h-6"/>
-          <span>{error}</span>
-        </div>
-      )}
-    </div>
+    </form>
   );
 }
 
