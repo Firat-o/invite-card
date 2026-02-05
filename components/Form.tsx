@@ -45,12 +45,11 @@ function Form() {
       setLoading(false);
     }
   };
-  // ------------------------------------------
 
   return (
-    <form onSubmit={handleSubmit} className="w-full space-y-10 mt-8 font-sans">
+    <form onSubmit={handleSubmit} className="w-full space-y-12 mt-10 font-sans">
       
-      <div className="relative group z-0">
+      <div className="relative group z-0 w-full">
         <input
           type="text"
           id="name"
@@ -59,28 +58,36 @@ function Form() {
           pattern="[A-Za-z\u00C0-\u024F\s]*"
           required
           placeholder=" "
-          className="block py-2.5 px-0 w-full text-sm text-[#2d3748] bg-transparent border-0 border-b border-[#5c7c59]/40 appearance-none focus:outline-none focus:ring-0 focus:border-[#5c7c59] peer transition-colors"
+          className="block py-3 px-0 w-full text-base text-center text-[#2d3748] bg-transparent border-0 border-b border-[#5c7c59]/30 appearance-none focus:outline-none focus:ring-0 focus:border-[#5c7c59] peer transition-colors placeholder-transparent"
         />
         <label
           htmlFor="name"
-          className="peer-focus:font-medium absolute text-sm text-[#5c7c59]/60 duration-300 transform -translate-y-6 scale-75 top-3 -z-10 origin-[0] peer-focus:start-0 rtl:peer-focus:translate-x-1/4 peer-focus:text-[#5c7c59] peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-6 tracking-wide uppercase"
+          className="absolute text-xs tracking-[0.2em] uppercase text-[#5c7c59]/50 duration-300 transform 
+                     top-3 -z-10 origin-center left-0 right-0 text-center whitespace-nowrap
+                     peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 
+                     peer-focus:scale-75 peer-focus:-translate-y-8 peer-focus:text-[#5c7c59]
+                     peer-[:not(:placeholder-shown)]:scale-75 peer-[:not(:placeholder-shown)]:-translate-y-8"
         >
-          Dein Vollständiger Name
+          Dein vollständiger Name
         </label>
       </div>
 
-      <div className="relative group z-0">
+      <div className="relative group z-0 w-full">
         <input
           type="text"
           id="guest"
           value={guestInput}
           onChange={(e) => setGuestInput(e.target.value)}
           placeholder=" "
-          className="block py-2.5 px-0 w-full text-sm text-[#2d3748] bg-transparent border-0 border-b border-[#5c7c59]/40 appearance-none focus:outline-none focus:ring-0 focus:border-[#5c7c59] peer transition-colors"
+          className="block py-3 px-0 w-full text-base text-center text-[#2d3748] bg-transparent border-0 border-b border-[#5c7c59]/30 appearance-none focus:outline-none focus:ring-0 focus:border-[#5c7c59] peer transition-colors placeholder-transparent"
         />
         <label
           htmlFor="guest"
-          className="peer-focus:font-medium absolute text-sm text-[#5c7c59]/60 duration-300 transform -translate-y-6 scale-75 top-3 -z-10 origin-[0] peer-focus:start-0 rtl:peer-focus:translate-x-1/4 peer-focus:text-[#5c7c59] peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-6 tracking-wide uppercase"
+          className="absolute text-xs tracking-[0.2em] uppercase text-[#5c7c59]/50 duration-300 transform 
+                     top-3 -z-10 origin-center left-0 right-0 text-center whitespace-nowrap
+                     peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 
+                     peer-focus:scale-75 peer-focus:-translate-y-8 peer-focus:text-[#5c7c59]
+                     peer-[:not(:placeholder-shown)]:scale-75 peer-[:not(:placeholder-shown)]:-translate-y-8"
         >
           Begleitung (Optional)
         </label>
@@ -92,7 +99,7 @@ function Form() {
             initial={{ opacity: 0, height: 0 }}
             animate={{ opacity: 1, height: "auto" }}
             exit={{ opacity: 0, height: 0 }}
-            className="flex items-center gap-2 text-red-600/80 text-xs font-medium"
+            className="flex justify-center items-center gap-2 text-red-600/80 text-xs font-medium"
           >
             <ExclamationCircleIcon className="w-4 h-4" />
             <span>{error}</span>
@@ -100,37 +107,36 @@ function Form() {
         )}
       </AnimatePresence>
 
-      <div className="pt-4">
+      <div className="pt-6">
         <motion.button
-          whileHover={{ scale: 1.02 }}
+          whileHover={{ scale: 1.01 }}
           whileTap={{ scale: 0.98 }}
           type="submit"
           disabled={isButtonDisabled}
-          className={`w-full py-4 uppercase tracking-[0.25em] text-xs font-bold transition-all duration-500 border
+          className={`w-full py-4 uppercase tracking-[0.25em] text-xs font-bold transition-all duration-500 shadow-xl shadow-[#5c7c59]/10
             ${success 
-              ? "bg-[#5c7c59] text-white border-[#5c7c59]" 
-              : "bg-transparent text-[#5c7c59] border-[#5c7c59] hover:bg-[#5c7c59] hover:text-white"
+              ? "bg-[#5c7c59] text-white" 
+              : "bg-[#5c7c59] text-[#F5F5F0] hover:bg-[#4a6347]"
             }
-            disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:bg-transparent disabled:hover:text-[#5c7c59]
+            disabled:opacity-50 disabled:cursor-not-allowed disabled:shadow-none
           `}
         >
           {loading ? (
             <span className="flex items-center justify-center gap-2">
-              <span className="w-2 h-2 bg-current rounded-full animate-bounce" style={{ animationDelay: "0s" }} />
-              <span className="w-2 h-2 bg-current rounded-full animate-bounce" style={{ animationDelay: "0.2s" }} />
-              <span className="w-2 h-2 bg-current rounded-full animate-bounce" style={{ animationDelay: "0.4s" }} />
+              <span className="w-1.5 h-1.5 bg-white rounded-full animate-bounce" style={{ animationDelay: "0s" }} />
+              <span className="w-1.5 h-1.5 bg-white rounded-full animate-bounce" style={{ animationDelay: "0.2s" }} />
+              <span className="w-1.5 h-1.5 bg-white rounded-full animate-bounce" style={{ animationDelay: "0.4s" }} />
             </span>
           ) : success ? (
             <span className="flex items-center justify-center gap-2">
               <CheckCircleIcon className="w-4 h-4" />
-              WIR FREUEN UNS
+              Empfangen
             </span>
           ) : (
             "Zusage bestätigen"
           )}
         </motion.button>
       </div>
-
     </form>
   );
 }
