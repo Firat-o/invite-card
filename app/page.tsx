@@ -3,8 +3,9 @@
 import { useEffect } from "react";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
-import LeafAnimation from "../components/LeafAnimation";
+import LeafAnimation from "../components/LeafAnimation"; 
 import Form from "@/components/Form";
+import { motion } from "framer-motion";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -27,40 +28,57 @@ export default function Home() {
   }, []);
 
   return (
-    <div className="relative min-h-screen overflow-hidden">
+    <div className="relative min-h-screen w-full overflow-hidden bg-[#F5F5F0]">
+      
+      <div className="fixed inset-0 pointer-events-none z-50 opacity-[0.03] mix-blend-multiply" 
+           style={{ backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E")` }}>
+      </div>
+
       <div className="fixed inset-0 z-0 pointer-events-none">
         <img
           src="/InviteCard.svg"
-          className="object-cover w-full h-full opacity-40 mix-blend-multiply"
+          className="object-cover w-full h-full opacity-30 mix-blend-multiply grayscale-[20%]"
           alt="Background"
         />
+        <div className="absolute inset-0 bg-radial-gradient from-transparent via-transparent to-[#F5F5F0]/80" />
       </div>
 
-      <main className="relative z-10 flex flex-col items-center justify-center min-h-screen p-6 sm:p-10 gap-8">
+      <main className="relative z-10 flex flex-col items-center justify-center min-h-screen p-4 sm:p-8">
         <LeafAnimation />
         
-        <div className="glass-card px-8 py-12 sm:px-12 text-center max-w-lg w-full fade-in-up">
-          <h2 className="text-2xl sm:text-3xl text-[#5c7c59] mb-4">
-            Wir laden dich herzlich ein zur
-          </h2>
-          
-          <h1 className="text-5xl sm:text-6xl text-[#2d3748] mb-10 leading-tight">
-            Hochzeitsfeier
-          </h1>
-          
-          <div className="space-y-3 text-xl tracking-wide border-t border-[#8fab8c]/30 pt-8">
-            <p>
-              <span className="font-semibold text-[#5c7c59]">Datum:</span> 11. Oktober 2024
+        <motion.div 
+          initial={{ opacity: 0, y: 40 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 1.2, ease: [0.22, 1, 0.36, 1] }}
+          className="w-full max-w-[500px] bg-white/40 backdrop-blur-xl border border-white/40 shadow-2xl shadow-[#5c7c59]/10 p-8 sm:p-12 md:p-16 text-center relative overflow-hidden"
+        >
+          <div className="absolute top-0 left-1/2 -translate-x-1/2 w-20 h-1 bg-[#5c7c59]" />
+
+          <div className="mb-12 space-y-6">
+            <p className="font-sans text-xs sm:text-sm uppercase tracking-[0.3em] text-[#5c7c59]">
+              Save The Date
             </p>
-            <p>
-              <span className="font-semibold text-[#5c7c59]">Ort:</span> Iserlohn, 58636
+            
+            <h1 className="font-serif text-5xl sm:text-7xl text-[#1a1a1a] italic leading-[0.9]">
+              Hochzeit
+            </h1>
+            
+            <p className="font-serif text-xl sm:text-2xl text-[#1a1a1a]/80 mt-2">
+              von uns beiden
             </p>
           </div>
-        </div>
-        
-        <div className="w-full max-w-lg fade-in-up" style={{ animationDelay: '0.2s' }}>
+
+          <div className="font-sans text-sm tracking-wide text-[#2d3748] border-y border-[#5c7c59]/20 py-6 mb-10 flex flex-col gap-2">
+             <p><span className="font-bold">11. OKTOBER 2024</span> — 14:00 UHR</p>
+             <p>SCHLOSS ISERLOHN — 58636</p>
+          </div>
+
           <Form />
-        </div>
+
+          <div className="mt-12 text-[10px] uppercase tracking-widest opacity-40">
+            Wir freuen uns auf euch
+          </div>
+        </motion.div>
       </main>
     </div>
   );
