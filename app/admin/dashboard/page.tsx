@@ -3,7 +3,8 @@
 import { useEffect, useState } from "react";
 import { onAuthStateChanged, signOut } from "firebase/auth";
 import { auth, db } from "@/firebase/firebase";
-import { collection, getDocs, query, orderBy } from "firebase/firestore";
+import { collection, getDocs, query, orderBy, deleteDoc, doc, writeBatch } from "firebase/firestore";
+import { TrashIcon } from "@heroicons/react/24/outline";
 import { useRouter } from "next/navigation";
 import { ArrowLeftStartOnRectangleIcon } from "@heroicons/react/24/outline";
 
