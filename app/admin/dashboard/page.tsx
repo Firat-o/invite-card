@@ -6,7 +6,6 @@ import { auth, db } from "@/firebase/firebase";
 import { collection, getDocs, query, orderBy, deleteDoc, doc, writeBatch } from "firebase/firestore";
 import { TrashIcon, ArrowLeftStartOnRectangleIcon, ArrowLeftIcon, UserIcon, SparklesIcon, UsersIcon } from "@heroicons/react/24/outline";
 import { useRouter } from "next/navigation";
-import Link from "next/link"; 
 
 // --- INTERFACE UPDATE ---
 // Damit verstehen wir alte UND neue Daten
@@ -104,9 +103,13 @@ export default function Dashboard() {
       
       {/* HEADER NAV */}
       <div className="max-w-5xl mx-auto mb-6 flex justify-between items-center">
-        <Link href="/" className="inline-flex items-center gap-2 text-[10px] sm:text-xs font-bold uppercase tracking-widest text-[#5c7c59]/60 hover:text-[#5c7c59] transition-colors">
+        {/* FIX: <Link> in <button> geändert und onClick={() => router.push("/")} hinzugefügt */}
+        <button 
+          onClick={() => router.push("/")} 
+          className="inline-flex items-center gap-2 text-[10px] sm:text-xs font-bold uppercase tracking-widest text-[#5c7c59]/60 hover:text-[#5c7c59] transition-colors cursor-pointer"
+        >
           <ArrowLeftIcon className="w-3 h-3" /> <span className="hidden sm:inline">Zurück zur Einladung</span><span className="sm:hidden">Zurück</span>
-        </Link>
+        </button>
         <button onClick={handleLogout} className="text-[10px] sm:text-xs uppercase tracking-widest text-[#5c7c59]/60 hover:text-[#5c7c59] flex items-center gap-2">
           Logout <ArrowLeftStartOnRectangleIcon className="w-4 h-4"/>
         </button>
