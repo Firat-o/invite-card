@@ -11,7 +11,7 @@ export default function AdminLogin() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
-  const [copiedField, setCopiedField] = useState<string | null>(null); // Welches Feld wurde kopiert?
+  const [copiedField, setCopiedField] = useState<string | null>(null);
   const router = useRouter();
 
   const handleLogin = async (e: React.FormEvent) => {
@@ -27,7 +27,6 @@ export default function AdminLogin() {
   const copyToClipboard = (text: string, field: string) => {
     navigator.clipboard.writeText(text);
     setCopiedField(field);
-    // Nach 2 Sekunden Reset
     setTimeout(() => setCopiedField(null), 2000);
   };
 
